@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %} Оплата {% endblock title%}
+
+{% block script %} <script src="https://js.stripe.com/v3/"></script> {% endblock script%}
+{% block content %}
+
+<section class="section-content padding-y bg">
+    <div class="container">
+
+        <h4 class="text-center mb-20">Проверьте Ваш заказ и совершите оплату</h4>
+
+        <div class="row">
+            <aside class="col-lg-8">
+                <div class="card">
+                  <h5 class="card-header">Данные для выставления счета</h5>
+                  <div class="card-body">
+                    <p class="card-text mb-0">{{ order.full_name }}</p>
+                      <p class="card-text mb-0">{{ order.email }}</p>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <h5 class="card-header">Метод оплаты</h5>
+                  <div class="card-body">
+                    <p class="card-text">Stripe</p>
+                  </div>
+                </div>
+
+                <div class="card">
+                  <h5 class="card-header">Обзор товаров</h5>
+                  <div class="card-body">
+
+                      <table class="table table-borderless table-shopping-cart">
+                            <thead class="text-muted">
+                            <tr class="small text-uppercase">
+                                <th scope="col">Товар</th>
+                                <th scope="col" width="120">Цена</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for order_item in order_items %}
+                            <tr>
+                                <td>
+                                    <figure class="itemside align-items-center">
+                                        <figcaption class="info">
+                                            <a href="{{ cart_item.product.get_url }}" class="title text-dark">
+                                                {{ order_item.item.name }}</a>
+                                        </figcaption>
+                                    </figure>
+                                </td>
+                                <td>
+                                    <div class="price-wrap">
+                                        <var class="price">{{ order_item.price }} ₽</var>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                  </div>
+                </div>
+
+            </aside>
+            <aside class="col-lg-4">
+
+                <div class="card">
+                    <div class="card-body">
+                        <dl class="dlist-align">
+                            <dt>Всего:</dt>
+                            <dd class="text-right">{{ total }} ₽</dd>
+                        </dl>
+                        {% if total_discount %}
+                        <dl class="dlist-align">
+                            <dt>Скидка:</dt>
+                            <dd class="text-right">- {{ discount_sum }} ₽</dd>
+                        </dl>
+
+                        <dl class="dlist-align">
+                            <dt><b>Итого:</b></dt>
+                            <dd class="text-right text-dark b"><strong>{{ total_discount }} ₽</strong></dd>
+                        </dl>
+                        {% endif %}
+                        <hr>
+                        <p class="text-center mb-3">
+                            <img src="{% static './images/stripelogo.png' %}" height="26">
+                        </p>
+                        <button type="submit" class="btn btn-primary"  id="checkout-button">Checkout</button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</section>
+
+{% csrf_token %}
+
+<script type="text/javascript">
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    let stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+    let checkoutButton = document.getElementById("checkout-button");
+    checkoutButton.addEventListener("click", function () {
+        fetch("{% url 'create-order-checkout-session' order.id %}", {
+            method: "POST",
+            headers: {
+                'X-CSRFToken': csrftoken
+            }
+        })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (session) {
+                return stripe.redirectToCheckout({sessionId: session.id});
+            })
+            .then(function (result) {
+                if (result.error) {
+                    alert(result.error.message);
+                }
+            })
+            .catch(function (error) {
+                console.error("Error:", error);
+            });
+    });
+</script>
+
+{% endblock %}

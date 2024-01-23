@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+
+{% block title %} Купить товар {% endblock title%}
+{% block script %} <script src="https://js.stripe.com/v3/"></script> {% endblock script%}
+{% block content %}
+<div class="card-deck">
+
+  <div class="card">
+    <img
+      class="card-img-top"
+      src="{{item.image.url}}"
+      alt="Card image cap"
+    />
+    <div class="card-body">
+      <h5 class="card-title">{{item.name}}</h5>
+      <p class="card-text">{{item.description}}</p>
+      <div class="card-text">
+        <h5 class="card-text">{{ item.price }}₽</h5>
+            <button type="submit" class="btn btn-primary"  id="checkout-button">Оплатить</button>
+          <form action="{% url 'add_cart' item.id %}" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">В корзину</button>
+          </form>
+      </div>
+
+    </div>
+
+  </div>
+
+
+</div>
+
+{% csrf_token %}
+
+<script type="text/javascript">
+    const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+    let stripe = Stripe("{{ STRIPE_PUBLIC_KEY }}");
+    let checkoutButton = document.getElementById("checkout-button");
+    checkoutButton.addEventListener("click", function () {
+        fetch("{% url 'create-checkout-session' item.id %}", {
+            method: "POST",
+            headers: {
+                'X-CSRFToken': csrftoken
+            }
+        })
+            .then(function (response) {
+                return response.json();
+            })
+            .then(function (session) {
+                return stripe.redirectToCheckout({sessionId: session.id});
+            })
+            .then(function (result) {
+                if (result.error) {
+                    alert(result.error.message);
+                }
+            })
+            .catch(function (error) {
+                console.error("Error:", error);
+            });
+    });
+</script>
+
+
+{% endblock content %}
