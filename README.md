@@ -45,3 +45,55 @@ docker-compose up -d --build
 - Зарегистрироваться на сайте: https://stripe.com/
 - Publishable key: https://dashboard.stripe.com/apikeys
 - Secret key: https://dashboard.stripe.com/apikeys
+
+## Приложение интернет-магазина
+Разворачивается в контейнере app. Состоит из 3 приложений:
+- товары (store),
+- корзина (cart),
+- заказы (orders).
+
+В данном проекте используется наследование в html-шаблонах. Имеется базовый шаблон, 
+от которого наследуются остальные шаблоны. Имеются блоки header и 
+content(сами шаблоны, которые передаются во view).
+
+### store
+Приложение отвечающее за товары.
+
+Модели:
+- Item
+- Discount
+- Tax
+
+Представления:
+- ItemListView
+- ItemDetailView
+- CreateCheckoutSessionView
+- CreateOrderCheckoutSessionView
+- SuccessView
+- CancelView
+
+### cart
+Приложение, реализующее работу с корзиной пользователя. 
+
+Модели:
+- Cart
+- CartItem
+
+Представления:
+- cart_id
+- add_cart
+- cart_page
+- remove_cart_item
+- checkout
+
+### orders
+Приложение отвечающее за заказы
+
+Модели:
+- Order
+- OrderItem
+
+Представления:
+- randomString
+- get_user
+- order_create
