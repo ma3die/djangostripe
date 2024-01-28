@@ -25,3 +25,23 @@ API с двумя методами:
 ☐ Добавить поле Item.currency, создать 2 Stripe Keypair на две разные валюты и в зависимости от валюты выбранного товара предлагать оплату в соответствующей валюте.
 
 ☐ Реализовать не Stripe Session, а Stripe Payment Intent.
+
+# Установка проекта
+Для разворачивания проекта используется docker-compose. Для этого необходимо:
+- указать переменные окружения в файле .env
+```
+SECRET_KEY=
+# Stripe
+STRIPE_PUBLIC_KEY=
+STRIPE_SECRET_KEY=
+ALLOWED_HOSTS=127.0.0.1 localhost
+```
+- скачать данные репозитория и запустить docker:
+```
+docker-compose up -d --build
+```
+
+### Получение api ключей
+- Зарегистрироваться на сайте: https://stripe.com/
+- Publishable key: https://dashboard.stripe.com/apikeys
+- Secret key: https://dashboard.stripe.com/apikeys
